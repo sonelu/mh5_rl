@@ -4,21 +4,18 @@
 <!-- |    EDITING THIS FILE BY HAND IS NOT RECOMMENDED                                 | -->
 <!-- =================================================================================== -->
 <robot name="mh5_robot">
-  <mujoco>
-    <compiler meshdir="meshes/" balanceinertia="true" discardvisual="false"/>
-  </mujoco>
   <link name="base_link"/>
   <link name="chest">
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/chest_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/chest_revH.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/chest_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/chest_revH.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -90,7 +87,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/head_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/head_revH.dae"/>
       </geometry>
       <material name="ivory">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -99,7 +96,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/head_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/head_revH.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -178,14 +175,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/upper_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/upper_arm.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/upper_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/upper_arm.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -253,14 +250,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/left_lower_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/left_lower_arm.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/left_lower_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/left_lower_arm.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -289,14 +286,14 @@
     <visual>
       <origin rpy="3.141592653589793 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/gripper.stl"/>
+        <mesh filename="package://mh5_description/meshes/gripper.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/gripper.stl"/>
+        <mesh filename="package://mh5_description/meshes/gripper.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -363,14 +360,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/upper_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/upper_arm.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/upper_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/upper_arm.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -438,14 +435,14 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/right_lower_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/right_lower_arm.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/right_lower_arm.stl"/>
+        <mesh filename="package://mh5_description/meshes/right_lower_arm.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -474,14 +471,14 @@
     <visual>
       <origin rpy="0.0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/gripper.stl"/>
+        <mesh filename="package://mh5_description/meshes/gripper.dae"/>
       </geometry>
       <material name="black"/>
     </visual>
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/gripper.stl"/>
+        <mesh filename="package://mh5_description/meshes/gripper.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -707,7 +704,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/foot_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/foot_revH.dae"/>
       </geometry>
       <material name="ivory">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -716,7 +713,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/foot_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/foot_revH.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -982,7 +979,7 @@
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/foot_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/foot_revH.dae"/>
       </geometry>
       <material name="ivory">
         <color rgba="0.8 0.8 0.8 1"/>
@@ -991,7 +988,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://mh5_description/meshes/foot_revH.stl"/>
+        <mesh filename="package://mh5_description/meshes/foot_revH.dae"/>
       </geometry>
     </collision>
     <inertial>
@@ -1047,7 +1044,7 @@
             <jointName>
                 head_p, head_y,
                 l_hip_p, l_hip_r, l_kne_p, l_kne_y, l_ank_p, l_ank_r,
-                r_hip_p, r_hip_r, r_kne_p, r_kne_y, r_ank_p, r_ank_r
+                r_hip_p, r_hip_r, r_kne_p, r_kne_y, r_ank_p, r_ank_r 
             </jointName>
             <updateRate>25</updateRate>
         </plugin> -->
