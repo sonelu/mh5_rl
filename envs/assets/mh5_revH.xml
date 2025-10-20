@@ -193,7 +193,11 @@
     <position name="r_kne_y" joint="r_kne_y" inheritrange="1" />
     <position name="r_ank_p" joint="r_ank_p" inheritrange="1" />
     <position name="r_ank_r" joint="r_ank_r" inheritrange="1" />
-  </actuator><default>
+  </actuator>
+
+  <default>
     <joint damping="1.084" armature="0.045" frictionloss="0.03" />
     <position kp="21.1" />
-  </default></mujoco>
+  </default>
+
+</mujoco>
