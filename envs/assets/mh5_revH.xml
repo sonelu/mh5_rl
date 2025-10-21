@@ -26,7 +26,7 @@
         <inertial pos="0 0 0" quat="0.92388 0.000152211 1.80156e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
         <joint name="head_y" pos="0 0 0" axis="0 0 1" range="-1.5708 1.5708" actuatorfrcrange="-1 1" />
         <geom quat="0 -0.707107 0 0.707107" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
-        <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
+        <geom quat="0 -0.707107 0 0.707107" type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
         <body name="head_frame" pos="0.024 0 0">
           <inertial pos="0 0 0" quat="0.49625 0.496429 -0.503588 0.503679" mass="0.090046" diaginertia="0.000215844 0.000188146 0.000158702" />
           <joint name="head_p" pos="0 0 0" axis="0 -1 0" range="-0.349066 0.785398" actuatorfrcrange="-1 1" />
@@ -96,32 +96,32 @@
       </body>
       <body name="left_hip_servo" pos="0 0.032 0">
         <inertial pos="0 0 0" quat="0.92388 0.000120368 9.48904e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-        <joint name="l_hip_r" pos="0 0 0" axis="1 0 0" range="-0.785398 2.35619" actuatorfrcrange="-1000 1000" damping="0.1" />
+        <joint name="l_hip_r" pos="0 0 0" axis="1 0 0" range="-0.785398 2.35619" actuatorfrcrange="-1.4 1.4" damping="1.0" />
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
         <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
         <body name="left_thigh" pos="0 0 -0.024">
           <inertial pos="0 0 0" quat="0.696823 0.696823 0.120156 -0.120156" mass="0.016" diaginertia="8.90388e-06 6.15012e-06 5.236e-06" />
-          <joint name="l_hip_p" pos="0 0 0" axis="0 -1 0" range="-1.88496 1.88496" actuatorfrcrange="-1000 1000" damping="0.1" />
+          <joint name="l_hip_p" pos="0 0 0" axis="0 -1 0" range="-1.88496 1.88496" actuatorfrcrange="-1.4 1.4" damping="1.0" />
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="thigh_revE" />
           <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="thigh_revE" />
           <body name="left_knee_servo" pos="-0.024 0 -0.061" quat="0.707107 0 0.707107 0">
             <inertial pos="0 0 0" quat="0.92388 0.000152211 1.80156e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-            <joint name="l_kne_p" pos="0 0 0" axis="0 1 0" range="0 3.76991" actuatorfrcrange="-1000 1000" damping="0.1" />
+            <joint name="l_kne_p" pos="0 0 0" axis="0 1 0" range="0 3.76991" actuatorfrcrange="-1.4 1.4" damping="1.0" />
             <geom pos="0 0 0.024" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
             <geom pos="0 0 0.024" type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
             <body name="left_tibia" pos="0.019 0 0.024" quat="0.707107 0 -0.707107 0">
               <inertial pos="0 0 0" quat="0.707051 0.707051 0.00891213 -0.00891213" mass="0.0077" diaginertia="3.21728e-06 2.78072e-06 1.377e-06" />
-              <joint name="l_kne_y" pos="0 0 0" axis="0 0 1" range="-0.785398 0.785398" actuatorfrcrange="-1000 1000" damping="0.1" />
+              <joint name="l_kne_y" pos="0 0 0" axis="0 0 1" range="-0.785398 0.785398" actuatorfrcrange="-1.4 1.4" damping="1.0" />
               <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="frame02_revC" />
               <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="frame02_revC" />
               <body name="left_ankle_servo" pos="0 0 -0.034" quat="0.707107 0 0 -0.707107">
                 <inertial pos="0 0 0" quat="0.92388 0.000120368 9.48904e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-                <joint name="l_ank_p" pos="0 0 0" axis="1 0 0" range="-1.5708 2.01062" actuatorfrcrange="-1000 1000" damping="0.1" />
+                <joint name="l_ank_p" pos="0 0 0" axis="1 0 0" range="-1.5708 2.01062" actuatorfrcrange="-1.4 1.4" damping="1.0" />
                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
                 <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
                 <body name="left_foot" pos="0 0 -0.024" quat="0.707107 0 0 0.707107">
                   <inertial pos="0 0 0" quat="0 0.713063 0 0.7011" mass="0.038" diaginertia="2.66038e-05 2.2262e-05 6.44523e-06" />
-                  <joint name="l_ank_r" pos="0 0 0" axis="1 0 0" range="-1.5708 1.5708" actuatorfrcrange="-1000 1000" damping="0.1" />
+                  <joint name="l_ank_r" pos="0 0 0" axis="1 0 0" range="-1.5708 1.5708" actuatorfrcrange="-1.4 1.4" damping="1.0" />
                   <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="foot_revH" />
                   <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="foot_revH" />
                 </body>
@@ -132,32 +132,32 @@
       </body>
       <body name="right_hip_servo" pos="0 -0.032 0">
         <inertial pos="0 0 0" quat="0.92388 0.000120368 9.48904e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-        <joint name="r_hip_r" pos="0 0 0" axis="-1 0 0" range="-0.785398 2.35619" actuatorfrcrange="-1000 1000" damping="0.1" />
+        <joint name="r_hip_r" pos="0 0 0" axis="-1 0 0" range="-0.785398 2.35619" actuatorfrcrange="-1.4 1.4" damping="1.0" />
         <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
         <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
         <body name="right_thigh" pos="0 0 -0.024">
           <inertial pos="0 0 0" quat="0.696823 0.696823 0.120156 -0.120156" mass="0.016" diaginertia="8.90388e-06 6.15012e-06 5.236e-06" />
-          <joint name="r_hip_p" pos="0 0 0" axis="0 -1 0" range="-1.88496 1.88496" actuatorfrcrange="-1000 1000" damping="0.1" />
+          <joint name="r_hip_p" pos="0 0 0" axis="0 -1 0" range="-1.88496 1.88496" actuatorfrcrange="-1.4 1.4" damping="1.0" />
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="thigh_revE" />
           <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="thigh_revE" />
           <body name="right_knee_servo" pos="-0.024 0 -0.061" quat="0.707107 0 0.707107 0">
             <inertial pos="0 0 0" quat="0.92388 0.000152211 1.80156e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-            <joint name="r_kne_p" pos="0 0 0" axis="0 1 0" range="0 3.76991" actuatorfrcrange="-1000 1000" damping="0.1" />
+            <joint name="r_kne_p" pos="0 0 0" axis="0 1 0" range="0 3.76991" actuatorfrcrange="-1.4 1.4" damping="1.0" />
             <geom pos="0 0 0.024" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
             <geom pos="0 0 0.024" type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
             <body name="right_tibia" pos="0.019 0 0.024" quat="0.707107 0 -0.707107 0">
               <inertial pos="0 0 0" quat="0.707051 0.707051 0.00891213 -0.00891213" mass="0.0077" diaginertia="3.21728e-06 2.78072e-06 1.377e-06" />
-              <joint name="r_kne_y" pos="0 0 0" axis="0 0 -1" range="-0.785398 0.785398" actuatorfrcrange="-1000 1000" damping="0.1" />
+              <joint name="r_kne_y" pos="0 0 0" axis="0 0 -1" range="-0.785398 0.785398" actuatorfrcrange="-1.4 1.4" damping="1.0" />
               <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="frame02_revC" />
               <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="frame02_revC" />
               <body name="right_ankle_servo" pos="0 0 -0.034" quat="0.707107 0 0 -0.707107">
                 <inertial pos="0 0 0" quat="0.92388 0.000120368 9.48904e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
-                <joint name="r_ank_p" pos="0 0 0" axis="1 0 0" range="-1.5708 2.01062" actuatorfrcrange="-1000 1000" damping="0.1" />
+                <joint name="r_ank_p" pos="0 0 0" axis="1 0 0" range="-1.5708 2.01062" actuatorfrcrange="-1.4 1.4" damping="1.0" />
                 <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
                 <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_2_idles_revC" />
                 <body name="right_foot" pos="0 0 -0.024" quat="0.707107 0 0 0.707107">
                   <inertial pos="0 0 0" quat="0 0.713063 0 0.7011" mass="0.038" diaginertia="2.66038e-05 2.2262e-05 6.44523e-06" />
-                  <joint name="r_ank_r" pos="0 0 0" axis="-1 0 0" range="-1.5708 1.5708" actuatorfrcrange="-1000 1000" damping="0.1" />
+                  <joint name="r_ank_r" pos="0 0 0" axis="-1 0 0" range="-1.5708 1.5708" actuatorfrcrange="-1.4 1.4" damping="1.0" />
                   <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="foot_revH" />
                   <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="foot_revH" />
                 </body>
