@@ -29,7 +29,7 @@
         <geom quat="0 -0.707107 0 0.707107" type="mesh" rgba="0.2 0.2 0.2 1" mesh="2XL430_1_idle_revC" />
         <body name="head_frame" pos="0.024 0 0">
           <inertial pos="0 0 0" quat="0.49625 0.496429 -0.503588 0.503679" mass="0.090046" diaginertia="0.000215844 0.000188146 0.000158702" />
-          <joint name="head_p" pos="0 0 0" axis="0 -1 0" range="-0.349066 0.785398" actuatorfrcrange="-1 1" />
+          <joint name="head_p" pos="0 0 0" axis="0 -1 0" range="-0.339066 0.775398" actuatorfrcrange="-1 1" />
           <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.8 0.8 0.8 1" mesh="head_revH" />
           <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="head_revH" />
         </body>
@@ -58,7 +58,7 @@
                 <inertial pos="0 0 0" quat="0.53152 0.53152 0.466354 0.466354" mass="0.004" diaginertia="1.26079e-06 7.94e-07 7.41212e-07" />
                 <joint name="l_gripper" pos="0 0 0" axis="0 0 1" range="0 1.5708" actuatorfrcrange="-1 1" />
                 <geom quat="0 1 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.2 0.2 0.2 1" mesh="gripper" />
-                <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="gripper" />
+                <geom quat="0 1 0 0" type="mesh" rgba="0.2 0.2 0.2 1" mesh="gripper" />
               </body>
             </body>
           </body>
