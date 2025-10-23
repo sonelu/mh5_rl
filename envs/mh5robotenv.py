@@ -36,7 +36,7 @@ class MH5RobotEnv(MujocoEnv):
             healthy_reward: float = 5.0,
             terminate_when_unhealthy: bool = True,
             healthy_z_range: tuple[float, float] = (0.12, 0.5),
-            reset_noise_scale: float = 1e-2,
+            reset_noise_scale: float = 3e-3,
             exclude_current_positions_from_observation: bool = True,
             include_cinert_in_observation: bool = True,
             include_cvel_in_observation: bool = True,
