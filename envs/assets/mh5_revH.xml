@@ -3,6 +3,16 @@
 
   <asset>
     <mesh name="chest_revH" file="chest_revH.stl" />
+    <mesh name="chest-batcover" file="chest-batcover.stl" />
+    <mesh name="chest-front" file="chest-front.stl" />
+    <mesh name="chest-hipl" file="chest-hipl.stl" />
+    <mesh name="chest-hipr" file="chest-hipr.stl" />
+    <mesh name="chest-middle" file="chest-middle.stl" />
+    <mesh name="chest-neck" file="chest-neck.stl" />
+    <mesh name="chest-screenback" file="chest-screenback.stl" />
+    <mesh name="chest-screenfront" file="chest-screenfront.stl" />
+    <mesh name="chest-sl" file="chest-sl.stl" />
+    <mesh name="chest-sr" file="chest-sr.stl" />
     <mesh name="2XL430_1_idle_revC" file="2XL430_1_idle_revC.stl" />
     <mesh name="head_revH" file="head_revH.stl" />
     <mesh name="frame04_revE" file="frame04_revE.stl" />
@@ -19,9 +29,28 @@
   <worldbody>
     <body name="chest" pos="0 0 0.203">
       <inertial pos="0 0 0" quat="0.707094 0.706321 0.022059 -0.0253348" mass="0.4" diaginertia="0.000956276 0.000635836 0.000597528" />
+      <camera name="track" mode="targetbody" target="chest" pos="1.5 -1.5 1" fovy="30"/>
       <joint name="chest_fixed" type="free" limited="false" actuatorfrclimited="false" />
-      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="chest_revH" />
-      <geom type="mesh" mesh="chest_revH" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-batcover" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-front" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-hipl" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-hipr" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-middle" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-neck" />
+      <geom type="mesh" rgba="0.0 0.0 0.8 0.5" contype="0" conaffinity="0" group="1" density="0" mesh="chest-screenback" />
+      <geom type="mesh" rgba="0.0 0.0 0.8 0.5" contype="0" conaffinity="0" group="1" density="0" mesh="chest-screenfront" />
+      <geom type="mesh" rgba="0.2 0.2 0.2 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-sl" />
+      <geom type="mesh" rgba="0.2 0.2 0.2 1" contype="0" conaffinity="0" group="1" density="0" mesh="chest-sr" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-batcover" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-front" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-hipl" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-hipr" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-middle" />
+      <geom type="mesh" rgba="0.8 0.8 0.8 1" mesh="chest-neck" />
+      <geom type="mesh" rgba="0.0 0.0 0.8 0.5" mesh="chest-screenback" />
+      <geom type="mesh" rgba="0.0 0.0 0.8 0.5" mesh="chest-screenfront" />
+      <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="chest-sl" />
+      <geom type="mesh" rgba="0.2 0.2 0.2 1" mesh="chest-sr" />
       <body name="head_servo" pos="-0.007076 0 0.198">
         <inertial pos="0 0 0" quat="0.92388 0.000152211 1.80156e-05 0.382683" mass="0.098" diaginertia="2.7637e-05 2.6329e-05 1.9139e-05" />
         <joint name="head_y" pos="0 0 0" axis="0 0 1" range="-1.5708 1.5708" actuatorfrcrange="-1 1" />
@@ -194,6 +223,10 @@
     <position name="r_ank_p" joint="r_ank_p" inheritrange="1" />
     <position name="r_ank_r" joint="r_ank_r" inheritrange="1" />
   </actuator>
+
+  <contact>
+    <exclude body1="chest" body2="head_frame" />
+  </contact>
 
   <default>
     <joint damping="1.084" armature="0.045" frictionloss="0.03" />

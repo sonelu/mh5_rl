@@ -1,4 +1,6 @@
 <mujoco model="mh5_revH scene">
+  <option integrator="RK4"/>
+
   <include file="mh5_revH.xml"/>
 
   <statistic center="0 0 0.2" extent="0.6"/>
