@@ -1,5 +1,5 @@
 from gymnasium.envs.registration import register
-from .mh5robotenv import MH5RobotEnv
+from .mh5robotenv import MH5RobotEnv, DEFAULT_OBS_CONFIG, DEFAULT_REW_CONFIG
 
 register(
     id="MH5Robot-v8",
