@@ -1,0 +1,144 @@
+[2025-11-06 15:37:19,106][trainer][INFO] - Using config:
+summary: '# Task: Walking - uncontrolled
+
+
+  Learning for uncontrolled walking (no joystick).
+
+
+  Important differences from other runs:
+
+  * learning rate: 1e-4; (trying again with this one although last run stopped because
+  of `nan`s)
+
+  * changed `forward_reward_weight` to 5.0 to encourage more exploration in the move
+  forward
+
+
+  Keep an eye:
+
+  * the policy might learn to keep the robot frozen upright to accumulate live reward
+  and ignore moving forward; might need to increase the reward for forward moving
+  to compensate for this
+
+  '
+logger:
+  log_level: INFO
+environment:
+  device: cpu
+  robot: MH5Robot-v8
+  fps: 100
+  orientation: standing
+  kwargs:
+    max_episode_steps: 2000
+    rew_config:
+      healthy_z_range:
+      - 0.15
+      - 0.25
+      forward_reward_weight: 5.0
+      ctrl_cost_weight: 0.1
+      contact_cost_weight: 5.0e-07
+      contact_cost_range:
+      - -.inf
+      - 10.0
+      healthy_reward: 5.0
+      terminate_when_unhealthy: true
+    obs_config:
+      number_obs_stack: 5
+      exclude_current_positions_from_observation: true
+      include_cinert_in_observation: false
+      include_cvel_in_observation: false
+      include_qfrc_actuator_in_observation: false
+      include_cfrc_ext_in_observation: false
+model:
+  policy_net_spec:
+  - 512
+  - 256
+  - 256
+  value_net_spec:
+  - 512
+  - 256
+  - 256
+  gae_gamma: 0.99
+  gae_lambda: 0.95
+collector:
+  frames_per_batch: 2000
+  total_frames: 10000000
+ClipPPOLoss:
+  clip_epsilon: 0.2
+  entropy_eps: 0.0001
+  critic_coeff: 1.0
+  loss_critic_type: smooth_l1
+  max_grad_norm: 1.0
+optim:
+  lr: 0.0001
+scheduler:
+  eta_min: 0.0
+training_loop:
+  num_epochs: 10
+  sub_batch_size: 128
+  validate_every_number_of_batches: 50
+continue_session:
+  from_checkpoint: null
+  restart_lr: true
+
+
+[2025-11-06 15:37:19,106][trainer][INFO] - using device: cpu
+[2025-11-06 15:37:19,773][trainer][INFO] - Training environment:
+TransformedEnv(
+    env=GymEnv(env=MH5Robot-v8, batch_size=torch.Size([]), device=cpu),
+    transform=Compose(
+            DoubleToFloat(in_keys=[], out_keys=[], in_keys_inv=[], out_keys_inv=[]),
+            StepCounter(keys=[])))
+EnvSpec(id='MH5Robot-v8', entry_point=<class 'envs.mh5robotenv.MH5RobotEnv'>, reward_threshold=None, nondeterministic=False, max_episode_steps=2000, order_enforce=True, disable_env_checker=True, kwargs={'rew_config': {'forward_reward_weight': 5.0, 'ctrl_cost_weight': 0.1, 'contact_cost_weight': 5e-07, 'contact_cost_range': [-inf, 10.0], 'healthy_reward': 5.0, 'terminate_when_unhealthy': True, 'healthy_z_range': [0.15, 0.25]}, 'obs_config': {'number_obs_stack': 5, 'exclude_current_positions_from_observation': True, 'include_cinert_in_observation': False, 'include_cvel_in_observation': False, 'include_qfrc_actuator_in_observation': False, 'include_cfrc_ext_in_observation': False}, 'orientation': <function orientation_standing at 0x10edb1620>}, namespace=None, name='MH5Robot', version=8, additional_wrappers=(), vector_entry_point=None)
+[2025-11-06 15:37:20,253][trainer][INFO] - Evaluation environment:
+TransformedEnv(
+    env=GymEnv(env=MH5Robot-v8, batch_size=torch.Size([]), device=cpu),
+    transform=Compose(
+            DoubleToFloat(in_keys=[], out_keys=[], in_keys_inv=[], out_keys_inv=[]),
+            StepCounter(keys=[]),
+            VideoRecorder(keys=['pixels'])))
+EnvSpec(id='MH5Robot-v8', entry_point=<class 'envs.mh5robotenv.MH5RobotEnv'>, reward_threshold=None, nondeterministic=False, max_episode_steps=2000, order_enforce=True, disable_env_checker=True, kwargs={'rew_config': {'forward_reward_weight': 5.0, 'ctrl_cost_weight': 0.1, 'contact_cost_weight': 5e-07, 'contact_cost_range': [-inf, 10.0], 'healthy_reward': 5.0, 'terminate_when_unhealthy': True, 'healthy_z_range': [0.15, 0.25]}, 'obs_config': {'number_obs_stack': 5, 'exclude_current_positions_from_observation': True, 'include_cinert_in_observation': False, 'include_cvel_in_observation': False, 'include_qfrc_actuator_in_observation': False, 'include_cfrc_ext_in_observation': False}, 'orientation': <function orientation_standing at 0x10edb1620>, 'render_mode': 'rgb_array'}, namespace=None, name='MH5Robot', version=8, additional_wrappers=(WrapperSpec(name='AddRenderObservation', entry_point='gymnasium.wrappers.transform_observation:AddRenderObservation', kwargs={'pixels_only': False, 'pixels_key': 'pixels', 'obs_key': 'state'}),), vector_entry_point=None)
+[2025-11-06 15:37:20,290][trainer][INFO] - Policy model:
+===========================================================================
+Layer (type:depth-idx)                             Param #
+===========================================================================
+ProbabilisticActor                                 --
+├─ModuleList: 1-1                                  --
+│    └─TensorDictModule: 2-1                       --
+│    │    └─Sequential: 3-1                        --
+│    │    │    └─Linear: 4-1                       151,552
+│    │    │    └─Tanh: 4-2                         --
+│    │    │    └─Linear: 4-3                       131,328
+│    │    │    └─Tanh: 4-4                         --
+│    │    │    └─Linear: 4-5                       65,792
+│    │    │    └─Tanh: 4-6                         --
+│    │    │    └─Linear: 4-7                       12,336
+│    │    │    └─NormalParamExtractor: 4-8         --
+│    │    │    │    └─biased_softplus: 5-1         --
+│    └─SafeProbabilisticModule: 2-2                --
+===========================================================================
+Total params: 361,008
+Trainable params: 361,008
+Non-trainable params: 0
+===========================================================================
+[2025-11-06 15:37:20,291][trainer][INFO] - Value model:
+=================================================================
+Layer (type:depth-idx)                   Param #
+=================================================================
+ValueOperator                            --
+├─Sequential: 1-1                        --
+│    └─Linear: 2-1                       151,552
+│    └─Tanh: 2-2                         --
+│    └─Linear: 2-3                       131,328
+│    └─Tanh: 2-4                         --
+│    └─Linear: 2-5                       65,792
+│    └─Tanh: 2-6                         --
+│    └─Linear: 2-7                       257
+=================================================================
+Total params: 348,929
+Trainable params: 348,929
+Non-trainable params: 0
+=================================================================
+[2025-11-06 15:37:20,468][trainer][INFO] - New training session will be started
+[2025-11-06 15:59:21,184][mh5_env][ERROR] - action contains nan: [nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan nan
+ nan nan nan nan nan nan]
