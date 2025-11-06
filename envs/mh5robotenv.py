@@ -125,7 +125,7 @@ class MH5RobotEnv(MujocoEnv):
             )
         )
 
-        self._obs_deque.append(one_obs.copy())
+        self._obs_deque.appendleft(one_obs.copy())
 
         while len(self._obs_deque) < self._obs_config['number_obs_stack']:
             self._obs_deque.append(one_obs.copy())
@@ -191,7 +191,8 @@ class MH5RobotEnv(MujocoEnv):
         if np.isnan(np.sum(observation)):
             logging.getLogger("mh5_env").error(f"observation contains nan: {observation}")
             raise ValueError(f"observation contains nan: {observation}")
-        reward, reward_info = self._get_rew(x_velocity, observation[2], action)
+        z_position = observation[2] if self._obs_config['exclude_current_positions_from_observation'] else observation[0]
+        reward, reward_info = self._get_rew(x_velocity, z_position, action)
         if np.isnan(reward):
             logging.getLogger("mh5_env").error(f"reward is nan: {reward}")
             raise ValueError(f"reward is nan: {reward}")
