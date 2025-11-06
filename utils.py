@@ -19,7 +19,7 @@ from torchrl.record import TensorboardLogger, CSVLogger
 from torchrl.modules import ProbabilisticActor, TanhNormal, ValueOperator
 from torchrl.objectives.value import GAE
 
-from envs import MH5RobotEnv
+from envs import MH5RobotEnv, DEFAULT_REW_CONFIG, DEFAULT_OBS_CONFIG
 
 
 def get_device(device: str = "cpu") -> torch.device:
@@ -67,6 +67,12 @@ def make_loggers(log_dir: str, level: str = "INFO") -> tuple[logging.Logger, Ten
 def make_environment(name: str, device: torch.device, orientation: str = "standing", **kwargs) -> TransformedEnv:
     orient_fun = get_orientation_func(orientation)
     kwargs['orientation'] = orient_fun
+    rew_config = DEFAULT_REW_CONFIG
+    rew_config.update(kwargs.get('rew_config', {}))
+    kwargs['rew_config'] = rew_config
+    obs_config = DEFAULT_OBS_CONFIG
+    obs_config.update(kwargs.get('obs_config', {}))
+    kwargs['obs_config'] = obs_config
     return TransformedEnv(
         GymEnv(name, device=device, **kwargs),
         Compose(

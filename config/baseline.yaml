@@ -1,3 +1,14 @@
+summary: |
+  # Task: Walking - uncontrolled
+
+  Learning for uncontrolled walking (no joystick).
+
+  Important differences from other runs:
+  * learning rate: 1e-4; (lr of 1e-3, 5e-4, 2.5e-4 are unstable and results in nans)
+
+  Keep an eye:
+  * the policy might learn to keep the robot frozen upright to accumulate live reward and ignore moving forward; might need to increase the reward for forward moving to compensate for this
+
 hydra:
   run:
     dir: outputs/${now:%Y%m%d%H%M%S}
@@ -8,16 +19,30 @@ logger:
 environment:
   device: cpu
   robot: MH5Robot-v8
-  fps: 50
-  orientation: front
+  fps: 100 # VideoRecorder uses a skip frame of 2 by default
+  orientation: standing
   kwargs:
-    healthy_z_range: [0.16, 0.25]
     max_episode_steps: 2000
+    rew_config:
+      healthy_z_range: [0.15, 0.25]
+      forward_reward_weight: 1.25
+      ctrl_cost_weight: 0.1
+      contact_cost_weight:  5e-7
+      contact_cost_range:  [-.inf, 10.0]
+      healthy_reward: 5.0
+      terminate_when_unhealthy: True
+    obs_config:
+      number_obs_stack: 5
+      exclude_current_positions_from_observation: True
+      include_cinert_in_observation:  False
+      include_cvel_in_observation:  False
+      include_qfrc_actuator_in_observation: False
+      include_cfrc_ext_in_observation: False
 
 
 model:
-  policy_net_spec: [256, 256, 256]
-  value_net_spec: [256, 256, 256]
+  policy_net_spec: [512, 256, 256]
+  value_net_spec: [512, 256, 256]
   gae_gamma: 0.99
   gae_lambda: 0.95
 
@@ -33,7 +58,7 @@ ClipPPOLoss:
   max_grad_norm: 1.0
 
 optim:
-  lr: 1e-5
+  lr: 1e-4
 
 scheduler:
   eta_min: 0.0

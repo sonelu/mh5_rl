@@ -25,6 +25,8 @@ def main(cfg):
         log_dir=output_dir,
         level=cfg.logger.log_level)
     logger.info(f"Using config:\n{OmegaConf.to_yaml(cfg)}\n")
+    with open(f"{output_dir}/summary.md", "w") as summary_file:
+        summary_file.write(cfg.summary)
 
     device = get_device(cfg.environment.device)
     logger.info(f"using device: {device}")
@@ -175,21 +177,15 @@ def main(cfg):
                 for s, p in enumerate(eval_rollout['observation'][:,0]):
                     tb_logger.log_scalar(name=f"eval_z_pos/{pbar.n}", value=p.item(), step=s)
                     csv_logger.log_scalar(name=f"eval_z_pos/{pbar.n}", value=p.item(), step=s)
-                # save the video
+                # save the video in all cases
                 eval_env.transform[-1].iter = pbar.n
                 eval_env.transform[-1].dump()
                 # save model checkpoint
-                torch.save({
-                    "policy": model['policy'].state_dict(),
-                    "value": model['value'].state_dict(),
-                    "advantage": model['advantage'].state_dict(),
-                    "loss": loss_module.state_dict(),
-                    "optimizer": optim.state_dict(),
-                    "scheduler": scheduler.state_dict(),
-                }, f=f"{output_dir}/checkpoints/valuation_checkpoint_{pbar.n}.pt")
+
 
                 if reward_sum > best_eval_sum:
                     best_eval_sum = reward_sum
+                    # save with the step info
                     torch.save({
                         "policy": model['policy'].state_dict(),
                         "value": model['value'].state_dict(),
@@ -197,7 +193,16 @@ def main(cfg):
                         "loss": loss_module.state_dict(),
                         "optimizer": optim.state_dict(),
                         "scheduler": scheduler.state_dict(),
-                        }, f=f"{output_dir}/best_valuation_checkpoint.pt")
+                    }, f=f"{output_dir}/checkpoints/valuation_checkpoint_{pbar.n}.pt")
+                    # save as best valuation
+                    torch.save({
+                        "policy": model['policy'].state_dict(),
+                        "value": model['value'].state_dict(),
+                        "advantage": model['advantage'].state_dict(),
+                        "loss": loss_module.state_dict(),
+                        "optimizer": optim.state_dict(),
+                        "scheduler": scheduler.state_dict(),
+                        }, f=f"{output_dir}/checkpoints/valuation_checkpoint_best.pt")
 
                 del eval_rollout
 
