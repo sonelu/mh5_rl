@@ -8,8 +8,10 @@ defaults:
   - env@environments.evaluation_env: transformed_env
   - env@environments.evaluation_env.base_env: gym
   - transform@environments.evaluation_env.transform: compose
+
   - transform@transform_step_counter: step_counter
   - transform@transform_double_to_float: double_to_float
+  - transform@transform_cat_frames: cat_frames
 
   - network@networks.policy_network: mlp
   - network@networks.value_network: mlp
@@ -39,6 +41,11 @@ transform_step_counter:
   max_steps: 2000
   step_count_key: "step_count"
 
+transform_cat_frames:
+  N: 5
+  dim: -1
+  in_keys: ["observation"]
+
 environments:
   training_env:
     base_env:
@@ -47,6 +54,7 @@ environments:
       transforms:
         - ${transform_step_counter}
         - ${transform_double_to_float}
+        - ${transform_cat_frames}
 
   evaluation_env:
     base_env:
@@ -58,6 +66,7 @@ environments:
       transforms:
         - ${transform_step_counter}
         - ${transform_double_to_float}
+        - ${transform_cat_frames}
         # VideoRecorder does not have yet Config and will have to be added in the PY code
 
 # Network configurations

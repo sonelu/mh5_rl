@@ -10,28 +10,7 @@ from gymnasium.spaces import Box
 import pathlib
 
 
-DEFAULT_OBS_CONFIG = {
-    "number_obs_stack": 5,
-    "exclude_current_positions_from_observation": True,
-    "include_cinert_in_observation":  False,
-    "include_cvel_in_observation":  False,
-    "include_qfrc_actuator_in_observation": False,
-    "include_cfrc_ext_in_observation": False,
-}
-
-# DEFAULT_REW_CONFIG = {
-#     "forward_reward_weight": 20.0, # increased from 10.0; increased form 5.0; increased from 1.25
-#     "ctrl_cost_weight": 0.5,       # decreased from 1.0; increased from 0.1
-#     "contact_cost_weight":  5e-5,  # increased from 5e-7
-#     "contact_cost_range":  (-np.inf, 10.0),
-#     "healthy_reward": 5.0,
-#     "terminate_when_unhealthy": True,
-#     "healthy_z_range": (0.15, 0.25),
-# }
-
-
 class MH5RobotEnv(MujocoEnv):
-
 
     metadata = {
         "render_modes": [
@@ -47,16 +26,14 @@ class MH5RobotEnv(MujocoEnv):
             model_path: str = "assets/scene.xml",
             timestep: float = 0.005, # dt = timestep * frame_skip = 0.005 * 1 = 0.005 => 200Hz
             frame_skip: int = 1,
-            # rew_config = DEFAULT_REW_CONFIG,
             k_healthy: float = 5.0,
             k_forward: float = 50.0,
             k_control: float = 0.025,
             k_contact: float = 5e-5,
-            terminate_when_unhealthy: float = True,
+            terminate_when_unhealthy: bool = True,
             healthy_z_range = (0.15, 0.25),
             contact_cost_range = (-np.inf, 10.0),
             reset_noise_scale: float = 3e-3,
-            obs_config = DEFAULT_OBS_CONFIG,
             orientation: Callable[[], NDArray] | None = None,
             **kwargs
         ):
@@ -69,10 +46,6 @@ class MH5RobotEnv(MujocoEnv):
         self._terminate_when_unhealthy = terminate_when_unhealthy
         self._healthy_z_range = healthy_z_range
         self._contact_cost_range = contact_cost_range
-
-        self._obs_config = obs_config
-        self._obs_deque = deque(maxlen=self._obs_config['number_obs_stack'])
-
         self._reset_noise_scale = reset_noise_scale
         self._orientation = orientation
 
@@ -81,105 +54,59 @@ class MH5RobotEnv(MujocoEnv):
             model_path=f"{pathlib.Path(__file__).parent.resolve()}/{model_path}",
             frame_skip=frame_skip,
             observation_space=None,
-            # default_camera_config = default_camera_config,
             **kwargs
         )
 
-        obs_size = self.data.qpos.size + self.data.qvel.size
-        obs_size -= 2 * self._obs_config['exclude_current_positions_from_observation']
-        obs_size += self.data.cinert[1:].size * self._obs_config['include_cinert_in_observation']
-        obs_size += self.data.cvel[1:].size * self._obs_config['include_cvel_in_observation']
-        obs_size += (self.data.qvel.size - 6) * self._obs_config['include_qfrc_actuator_in_observation']
-        obs_size += self.data.cfrc_ext[1:].size * self._obs_config['include_cfrc_ext_in_observation']
-
-        self.observation_space = Box(
-            low=-np.inf, high=np.inf, shape=(obs_size*self._obs_config['number_obs_stack'],), dtype=np.float64
-        )
-
+        # we exclude the position_x and position_y from the observation as these cannot
+        # be produced without external positioning sensors and anyway are not relevant
+        # for the walking task
+        obs_size = self.data.qpos.size + self.data.qvel.size - 2
+        self.observation_space = Box(low=-np.inf, high=np.inf, shape=(obs_size,), dtype=np.float64)
         self.model.opt.timestep = timestep
 
     @property
-    def is_healthy(self):
+    def z_pos(self):
+        return self.data.qpos[2]
+
+    @property
+    def is_healthy(self) -> bool:
         min_z, max_z = self._healthy_z_range
-        is_healthy = min_z < self.data.qpos[2] < max_z
+        is_healthy: bool = min_z < self.z_pos < max_z
         return is_healthy
 
-    def _get_obs(self):
+    def _get_obs(self) -> NDArray[np.float64]:
         position = self.data.qpos.flatten()
         velocity = self.data.qvel.flatten()
+        obs = np.concatenate((position[2:], velocity), dtype=np.float64)
+        return obs
 
-        if self._obs_config['include_cinert_in_observation'] is True:
-            com_inertia = self.data.cinert[1:].flatten()
-        else:
-            com_inertia = np.array([])
-        if self._obs_config['include_cvel_in_observation'] is True:
-            com_velocity = self.data.cvel[1:].flatten()
-        else:
-            com_velocity = np.array([])
-
-        if self._obs_config['include_qfrc_actuator_in_observation'] is True:
-            actuator_forces = self.data.qfrc_actuator[6:].flatten()
-        else:
-            actuator_forces = np.array([])
-        if self._obs_config['include_cfrc_ext_in_observation'] is True:
-            external_contact_forces = self.data.cfrc_ext[1:].flatten()
-        else:
-            external_contact_forces = np.array([])
-
-        if self._obs_config['exclude_current_positions_from_observation']:
-            position = position[2:]
-
-        one_obs = np.concatenate(
-            (
-                position,
-                velocity,
-                com_inertia,
-                com_velocity,
-                actuator_forces,
-                external_contact_forces,
-            )
-        )
-
-        self._obs_deque.appendleft(one_obs.copy())
-
-        while len(self._obs_deque) < self._obs_config['number_obs_stack']:
-            self._obs_deque.append(one_obs.copy())
-
-        return np.concatenate([o for o in self._obs_deque])
-
-
-    def _get_rew(self, x_velocity: float, z_position: float, action):
+    def _get_rew(self) -> tuple[np.float64, dict[str, NDArray[np.float64]]]:
         # forward reward only if upright
-        if z_position >= self._healthy_z_range[0]:
-            forward_reward = self._k_forward * x_velocity
+        if self.z_pos >= self._healthy_z_range[0]:
+            forward_reward = self._k_forward * self.data.qvel[0]
         else:
             forward_reward = 0.0
 
-        position_reward = self._k_healthy if self.is_healthy else 0
-        rewards = forward_reward + position_reward
+        healthy_reward = self._k_healthy if self.is_healthy else 0
+        rewards = forward_reward + healthy_reward
 
-        ctrl_cost = self.control_cost(action)
+        control_cost = self.control_cost
         contact_cost = self.contact_cost
-        costs = ctrl_cost + contact_cost
+        costs = control_cost + contact_cost
 
         reward = rewards - costs
 
         reward_info = {
-            "reward_position": np.array(position_reward),
+            "reward_healthy": np.array(healthy_reward),
             "reward_forward": np.array(forward_reward),
-            "reward_ctrl": np.array(-ctrl_cost),
-            "reward_contact": np.array(-contact_cost),
+            "reward_ctrl": np.array(control_cost),
+            "reward_contact": np.array(contact_cost),
         }
 
         return reward, reward_info
 
-    def mass_center(self):
-        """Calculate center of mass as weighted average: (model.body_mass.T * data.xipos) / sum(model.body_mass)."""
-        num = np.einsum("b,bj->j", self.model.body_mass, self.data.xipos)
-        denom = self.model.body_mass.sum()
-        return (num / denom)[0:2].copy()
-
-    def control_cost(self, action):
+    @property
+    def control_cost(self):
         control_cost = self._k_control * np.sum(np.square(self.data.ctrl))
         return control_cost
 
@@ -195,29 +122,27 @@ class MH5RobotEnv(MujocoEnv):
         if np.isnan(np.sum(action)):
             logging.getLogger("mh5_env").error(f"action contains nan: {action}")
             raise ValueError(f"action contains nan: {action}")
-        xy_position_before = self.mass_center()
-        self.do_simulation(action, self.frame_skip)
-        xy_position_after = self.mass_center()
 
-        xy_velocity = (xy_position_after - xy_position_before) / self.dt
-        x_velocity, y_velocity = xy_velocity
-
+        x_velocity, y_velocity = self.data.qvel[:2]
         observation = self._get_obs()
+
         if np.isnan(np.sum(observation)):
             logging.getLogger("mh5_env").error(f"observation contains nan: {observation}")
             raise ValueError(f"observation contains nan: {observation}")
-        z_position = observation[2] if self._obs_config['exclude_current_positions_from_observation'] else observation[0]
-        reward, reward_info = self._get_rew(x_velocity, z_position, action)
+
+        reward, reward_info = self._get_rew()
+
         if np.isnan(reward):
             logging.getLogger("mh5_env").error(f"reward is nan: {reward}")
             raise ValueError(f"reward is nan: {reward}")
-        terminated = (not self.is_healthy) and self._terminate_when_unhealthy
+
+        terminated: bool = (not self.is_healthy) and self._terminate_when_unhealthy
 
         info = {
             "x_position": self.data.qpos[0],
             "y_position": self.data.qpos[1],
-            "tendon_length": self.data.ten_length,
-            "tendon_velocity": self.data.ten_velocity,
+            # "tendon_length": self.data.ten_length,
+            # "tendon_velocity": self.data.ten_velocity,
             "distance_from_origin": np.linalg.norm(self.data.qpos[0:2], ord=2),
             "x_velocity": x_velocity,
             "y_velocity": y_velocity,
@@ -244,8 +169,6 @@ class MH5RobotEnv(MujocoEnv):
             low=noise_low, high=noise_high, size=self.model.nv
         )
         self.set_state(qpos, qvel)
-
-        self._obs_deque.clear()
         observation = self._get_obs()
         return observation
 
