@@ -26,3 +26,54 @@ Keep an eye:
 
 Issues:
 * still issues `nan`s after 660k steps. Will have to reduce the LR and compensate with smaller sub-batch and possibly number of epoch increase to stimulate training
+
+# [~2025/11/06-16:31:50] Task: Walking - uncontrolled
+
+Learning for uncontrolled walking (no joystick).
+
+Important differences from other runs:
+* learning rate: 1e-5
+* `forward_reward_weight`: 5.0 to encourage more exploration in the move forward
+* `sub-sub_batch_size`: 64 (double the number of training backprops to compensate for smaller LR)
+* `num_epochs`: 20 (double the number of training backprops to compensate for the smaller LR)
+
+Keep an eye:
+* the policy might learn to keep the robot frozen upright to accumulate live reward and ignore moving forward; might need to increase the reward for forward moving to compensate for this
+
+Issues:
+* training too slow; stopped at 2M step as it's not progressing well
+* it is possible that the `nan` issues were due to the incorrect environment setup that was fixed [here](https://github.com/sonelu/mh5_rl/commit/401d2b08feeffeaa9e5c985523e5890cfc699b2a)
+
+
+# [~2025/11/06-18:35:22] Task: Walking - uncontrolled
+
+Learning for uncontrolled walking (no joystick).
+
+Important differences from other runs:
+* learning rate: 2e-5 (attempting to see if the `nan` was fixed by changes to the env handling of z_position)
+* `forward_reward_weight`: 5.0 to encourage more exploration in the move forward
+* `sub-sub_batch_size`: 64 (double the number of training backprops to compensate for smaller LR)
+* `num_epochs`: 10 (to reduce the excessive training time)
+
+Keep an eye:
+* the policy might learn to keep the robot frozen upright to accumulate live reward and ignore moving forward; might need to increase the reward for forward moving to compensate for this
+
+Issues:
+* failed after aprox 4M steps
+* doesn't seem to learn after 2.5M steps
+
+# [2025/11/06-22:07:16](20251106220716/trainer.log) Task: Walking - uncontrolled
+
+Learning for uncontrolled walking (no joystick).
+
+Important differences from other runs:
+* learning rate: 2e-5 (attempting to see if the `nan` was fixed by changes to the env handling of z_position)
+* `forward_reward_weight`: 5.0 to encourage more exploration in the move forward
+* `sub-sub_batch_size`: 64 (double the number of training backprops to compensate for smaller LR)
+* `num_epochs`: 10 (to reduce the excessive training time)
+
+Keep an eye:
+* the policy might learn to keep the robot frozen upright to accumulate live reward and ignore moving forward; might need to increase the reward for forward moving to compensate for this
+
+Issues:
+* At 3M frames the robot learns to freeze in position and stay there for the duration of the episode. There is no movement forward.

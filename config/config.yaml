@@ -1,0 +1,136 @@
+defaults:
+
+  - logger@logger: wandb
+
+  - env@environments.training_env: transformed_env
+  - env@environments.training_env.base_env: gym
+  - transform@environments.training_env.transform: compose
+  - env@environments.evaluation_env: transformed_env
+  - env@environments.evaluation_env.base_env: gym
+  - transform@environments.evaluation_env.transform: compose
+  - transform@transform_step_counter: step_counter
+  - transform@transform_double_to_float: double_to_float
+
+  - network@networks.policy_network: mlp
+  - network@networks.value_network: mlp
+  - model@models.policy_model: tanh_normal
+  - model@models.value_model: value
+
+  - loss@loss: ppo
+  - optimizer@optimizer: adam
+
+  - collector@collector: sync
+
+  - replay_buffer@replay_buffer: base
+  - storage@replay_buffer.storage: lazy_tensor
+  - writer@replay_buffer.writer: round_robin
+  - sampler@replay_buffer.sampler: without_replacement
+
+  - trainer@trainer: ppo
+
+  - _self_
+
+logger:
+  exp_name: ${now:%m%d-%H%M}
+  offline: false
+  project: MH5_RL
+
+transform_step_counter:
+  max_steps: 2000
+  step_count_key: "step_count"
+
+environments:
+  training_env:
+    base_env:
+      env_name: MH5Robot-v8
+    transform:
+      transforms:
+        - ${transform_step_counter}
+        - ${transform_double_to_float}
+
+  evaluation_env:
+    base_env:
+      env_name: MH5Robot-v8
+      from_pixels: true
+      pixels_only: false
+      render_mode: rgb_array
+    transform:
+      transforms:
+        - ${transform_step_counter}
+        - ${transform_double_to_float}
+        # VideoRecorder does not have yet Config and will have to be added in the PY code
+
+# Network configurations
+networks:
+  policy_network:
+    out_features: 48  # 24 DoF * 2 (mean + std)
+    in_features: 295   # 59*5 stacked
+    num_cells: [512, 256, 256]
+
+  value_network:
+    out_features: 1  # Value output
+    in_features: 295   # 59*5 stacked
+    num_cells: [512, 256, 256]
+
+# Model configurations
+models:
+  policy_model:
+    return_log_prob: true
+    in_keys: ["observation"]
+    param_keys: ["loc", "scale"]
+    out_keys: ["action"]
+    network: ${networks.policy_network}
+
+  value_model:
+    in_keys: ["observation"]
+    out_keys: ["state_value"]
+    network: ${networks.value_network}
+
+# Loss configuration
+loss:
+  actor_network: ${models.policy_model}
+  critic_network: ${models.value_model}
+  entropy_coeff: 0.01
+
+# Optimizer configuration
+optimizer:
+  lr: 0.0001
+
+# Collector configuration
+collector:
+  create_env_fn: ${environments.training_env}
+  policy: ${models.policy_model}
+  # total_frames: 1000000
+  frames_per_batch: 2000
+
+# Replay buffer configuration
+replay_buffer:
+  storage:
+    max_size: 6000
+    device: cpu
+    ndim: 1
+  sampler:
+    drop_last: true
+    shuffle: true
+  writer:
+    compilable: false
+  batch_size: 256
+
+# Trainer configuration
+trainer:
+  collector: ${collector}
+  optimizer: ${optimizer}
+  replay_buffer: ${replay_buffer}
+  loss_module: ${loss}
+  logger: ${logger}
+  total_frames: 10_000_000
+  frame_skip: 1
+  clip_grad_norm: true
+  clip_norm: 100.0
+  progress_bar: true
+  seed: 42
+  # save_trainer_interval: 100
+  log_interval: 100
+  save_trainer_file: best_validation_checkpoint.pt
+  optim_steps_per_batch: null
+  num_epochs: 2

@@ -4,7 +4,11 @@ summary: |
   Learning for uncontrolled walking (no joystick).
 
   Important differences from other runs:
-  * learning rate: 1e-4; (lr of 1e-3, 5e-4, 2.5e-4 are unstable and results in nans)
+  * policy and actor net specs [1024, 256, 256] to account better for increased number of observation due to stacking
+  * learning rate: 1e-5 (attempting to see if the `nan` was fixed by changes to the env handling of z_position)
+  * `forward_reward_weight`: 5.0 to encourage more exploration in the move forward
+  * `sub-sub_batch_size`: 128 (increase the training speed)
+  * `num_epochs`: 8 (increase the training speed)
 
   Keep an eye:
   * the policy might learn to keep the robot frozen upright to accumulate live reward and ignore moving forward; might need to increase the reward for forward moving to compensate for this
@@ -25,7 +29,7 @@ environment:
     max_episode_steps: 2000
     rew_config:
       healthy_z_range: [0.15, 0.25]
-      forward_reward_weight: 1.25
+      forward_reward_weight: 5.0
       ctrl_cost_weight: 0.1
       contact_cost_weight:  5e-7
       contact_cost_range:  [-.inf, 10.0]
@@ -41,8 +45,8 @@ environment:
 
 
 model:
-  policy_net_spec: [512, 256, 256]
-  value_net_spec: [512, 256, 256]
+  policy_net_spec: [1024, 256, 256]
+  value_net_spec: [1024, 256, 256]
   gae_gamma: 0.99
   gae_lambda: 0.95
 
@@ -58,13 +62,13 @@ ClipPPOLoss:
   max_grad_norm: 1.0
 
 optim:
-  lr: 1e-4
+  lr: 1e-5
 
 scheduler:
   eta_min: 0.0
 
 training_loop:
-  num_epochs: 10
+  num_epochs: 8
   sub_batch_size: 128
   validate_every_number_of_batches: 50
 

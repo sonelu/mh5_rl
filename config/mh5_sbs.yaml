@@ -1,0 +1,65 @@
+defaults:
+
+  - env@environments.training_env: transformed_env
+  - env@environments.training_env.base_env: gym
+  - transform@environments.training_env.transform: compose
+  - transform@transform_step_count: step_counter
+  - transform@transform_double_to_float: double_to_float
+  - env@environments.evaluation_env: transformed_env
+
+  - model@models.policy_model: tanh_normal
+  - model@models.value_model: value
+
+  - network@networks.policy_network: mlp
+  - network@networks.value_network: mlp
+
+  - _self_
+
+# Network configurations
+networks:
+  policy_network:
+    out_features: 48  # 24 DoF * 2 (mean + std)
+    in_features: 295   # 59*5 stacked
+    num_cells: [512, 256, 256]
+
+  value_network:
+    out_features: 1  # Value output
+    in_features: 295   # 59*5 stacked
+    num_cells: [512, 256, 256]
+
+# Model configurations
+models:
+  policy_model:
+    return_log_prob: true
+    in_keys: ["observation"]
+    param_keys: ["loc", "scale"]
+    out_keys: ["action"]
+    network: ${networks.policy_network}
+
+  value_model:
+    in_keys: ["observation"]
+    out_keys: ["state_value"]
+    network: ${networks.value_network}
+
+transform_step_count:
+  max_steps: 2000
+  step_count_key: "step_count"
+
+
+environments:
+  training_env:
+    base_env:
+      env_name: MH5Robot-v8
+    transform:
+      transforms:
+        - ${transform_step_count}
+        - ${transform_double_to_float}
+
+  evaluation_env:
+    base_env:
+      env_name: MH5Robot-v8
+    transform:
+      transforms:
+        - ${transform_step_count}
+        - ${transform_double_to_float}
+        - ${transform_video_recorder}
