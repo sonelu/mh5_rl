@@ -19,15 +19,15 @@ DEFAULT_OBS_CONFIG = {
     "include_cfrc_ext_in_observation": False,
 }
 
-DEFAULT_REW_CONFIG = {
-    "forward_reward_weight": 1.25,
-    "ctrl_cost_weight": 0.1,
-    "contact_cost_weight":  5e-7,
-    "contact_cost_range":  (-np.inf, 10.0),
-    "healthy_reward": 5.0,
-    "terminate_when_unhealthy": True,
-    "healthy_z_range": (0.15, 0.25),
-}
+# DEFAULT_REW_CONFIG = {
+#     "forward_reward_weight": 20.0, # increased from 10.0; increased form 5.0; increased from 1.25
+#     "ctrl_cost_weight": 0.5,       # decreased from 1.0; increased from 0.1
+#     "contact_cost_weight":  5e-5,  # increased from 5e-7
+#     "contact_cost_range":  (-np.inf, 10.0),
+#     "healthy_reward": 5.0,
+#     "terminate_when_unhealthy": True,
+#     "healthy_z_range": (0.15, 0.25),
+# }
 
 
 class MH5RobotEnv(MujocoEnv):
@@ -47,14 +47,29 @@ class MH5RobotEnv(MujocoEnv):
             model_path: str = "assets/scene.xml",
             timestep: float = 0.005, # dt = timestep * frame_skip = 0.005 * 1 = 0.005 => 200Hz
             frame_skip: int = 1,
-            rew_config = DEFAULT_REW_CONFIG,
+            # rew_config = DEFAULT_REW_CONFIG,
+            k_healthy: float = 5.0,
+            k_forward: float = 50.0,
+            k_control: float = 0.025,
+            k_contact: float = 5e-5,
+            terminate_when_unhealthy: float = True,
+            healthy_z_range = (0.15, 0.25),
+            contact_cost_range = (-np.inf, 10.0),
             reset_noise_scale: float = 3e-3,
             obs_config = DEFAULT_OBS_CONFIG,
             orientation: Callable[[], NDArray] | None = None,
             **kwargs
         ):
 
-        self._rew_config = rew_config
+        # self._rew_config = rew_config
+        self._k_healthy = k_healthy
+        self._k_forward = k_forward
+        self._k_control = k_control
+        self._k_contact = k_contact
+        self._terminate_when_unhealthy = terminate_when_unhealthy
+        self._healthy_z_range = healthy_z_range
+        self._contact_cost_range = contact_cost_range
+
         self._obs_config = obs_config
         self._obs_deque = deque(maxlen=self._obs_config['number_obs_stack'])
 
@@ -78,14 +93,14 @@ class MH5RobotEnv(MujocoEnv):
         obs_size += self.data.cfrc_ext[1:].size * self._obs_config['include_cfrc_ext_in_observation']
 
         self.observation_space = Box(
-            low=-np.inf, high=np.inf, shape=(obs_size*self._obs_config['number_obs_stack'],), dtype=np.float32
+            low=-np.inf, high=np.inf, shape=(obs_size*self._obs_config['number_obs_stack'],), dtype=np.float64
         )
 
         self.model.opt.timestep = timestep
 
     @property
     def is_healthy(self):
-        min_z, max_z = self._rew_config['healthy_z_range']
+        min_z, max_z = self._healthy_z_range
         is_healthy = min_z < self.data.qpos[2] < max_z
         return is_healthy
 
@@ -135,12 +150,12 @@ class MH5RobotEnv(MujocoEnv):
 
     def _get_rew(self, x_velocity: float, z_position: float, action):
         # forward reward only if upright
-        if z_position >= self._rew_config['healthy_z_range'][0]:
-            forward_reward = self._rew_config['forward_reward_weight'] * x_velocity
+        if z_position >= self._healthy_z_range[0]:
+            forward_reward = self._k_forward * x_velocity
         else:
             forward_reward = 0.0
 
-        position_reward = self._rew_config['healthy_reward'] if self.is_healthy else 0
+        position_reward = self._k_healthy if self.is_healthy else 0
         rewards = forward_reward + position_reward
 
         ctrl_cost = self.control_cost(action)
@@ -150,10 +165,10 @@ class MH5RobotEnv(MujocoEnv):
         reward = rewards - costs
 
         reward_info = {
-            "reward_position": position_reward,
-            "reward_forward": forward_reward,
-            "reward_ctrl": -ctrl_cost,
-            "reward_contact": -contact_cost,
+            "reward_position": np.array(position_reward),
+            "reward_forward": np.array(forward_reward),
+            "reward_ctrl": np.array(-ctrl_cost),
+            "reward_contact": np.array(-contact_cost),
         }
 
         return reward, reward_info
@@ -165,14 +180,14 @@ class MH5RobotEnv(MujocoEnv):
         return (num / denom)[0:2].copy()
 
     def control_cost(self, action):
-        control_cost = self._rew_config['ctrl_cost_weight'] * np.sum(np.square(self.data.ctrl))
+        control_cost = self._k_control * np.sum(np.square(self.data.ctrl))
         return control_cost
 
     @property
     def contact_cost(self):
         contact_forces = self.data.cfrc_ext
-        contact_cost = self._rew_config['contact_cost_weight'] * np.sum(np.square(contact_forces))
-        min_cost, max_cost = self._rew_config['contact_cost_range']
+        contact_cost = self._k_contact * np.sum(np.square(contact_forces))
+        min_cost, max_cost = self._contact_cost_range
         contact_cost = np.clip(contact_cost, min_cost, max_cost)
         return contact_cost
 
@@ -196,7 +211,7 @@ class MH5RobotEnv(MujocoEnv):
         if np.isnan(reward):
             logging.getLogger("mh5_env").error(f"reward is nan: {reward}")
             raise ValueError(f"reward is nan: {reward}")
-        terminated = (not self.is_healthy) and self._rew_config['terminate_when_unhealthy']
+        terminated = (not self.is_healthy) and self._terminate_when_unhealthy
 
         info = {
             "x_position": self.data.qpos[0],
