@@ -9,6 +9,12 @@ from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
 from gymnasium.spaces import Box
 import pathlib
 
+MAX_EPISODE_STEPS = 2000
+
+DEFAULT_K_HEALTHY = 5.0
+DEFAULT_K_FORWARD = 1.25
+DEFAULT_K_CONTROL = 0.02
+DEFAULT_K_CONTACT = 5e-5
 
 class MH5RobotEnv(MujocoEnv):
 
@@ -26,10 +32,10 @@ class MH5RobotEnv(MujocoEnv):
             model_path: str = "assets/scene.xml",
             timestep: float = 0.005, # dt = timestep * frame_skip = 0.005 * 1 = 0.005 => 200Hz
             frame_skip: int = 1,
-            k_healthy: float = 5.0,
-            k_forward: float = 50.0,
-            k_control: float = 0.025,
-            k_contact: float = 5e-5,
+            k_healthy: float = DEFAULT_K_HEALTHY,
+            k_forward: float = DEFAULT_K_FORWARD,
+            k_control: float = DEFAULT_K_CONTROL,
+            k_contact: float = DEFAULT_K_CONTACT,
             terminate_when_unhealthy: bool = True,
             healthy_z_range = (0.15, 0.25),
             contact_cost_range = (-np.inf, 10.0),
@@ -48,6 +54,7 @@ class MH5RobotEnv(MujocoEnv):
         self._contact_cost_range = contact_cost_range
         self._reset_noise_scale = reset_noise_scale
         self._orientation = orientation
+        self._steps_taken: int = 0
 
         MujocoEnv.__init__(
             self,
@@ -63,6 +70,18 @@ class MH5RobotEnv(MujocoEnv):
         obs_size = self.data.qpos.size + self.data.qvel.size - 2
         self.observation_space = Box(low=-np.inf, high=np.inf, shape=(obs_size,), dtype=np.float64)
         self.model.opt.timestep = timestep
+
+    def update_reward_coeff(
+            self,
+            k_healthy: float = DEFAULT_K_HEALTHY,
+            k_forward: float = DEFAULT_K_FORWARD,
+            k_control: float = DEFAULT_K_CONTROL,
+            k_contact: float = DEFAULT_K_CONTACT
+    ) -> None:
+        self._k_healthy = k_healthy
+        self._k_forward = k_forward
+        self._k_control = k_control
+        self._k_contact = k_contact
 
     @property
     def z_pos(self):
@@ -84,10 +103,11 @@ class MH5RobotEnv(MujocoEnv):
         # forward reward only if upright
         if self.z_pos >= self._healthy_z_range[0]:
             forward_reward = self._k_forward * self.data.qvel[0]
+            healthy_reward = self._k_healthy * self._steps_taken / MAX_EPISODE_STEPS
         else:
             forward_reward = 0.0
+            healthy_reward = 0.0
 
-        healthy_reward = self._k_healthy if self.is_healthy else 0
         rewards = forward_reward + healthy_reward
 
         control_cost = self.control_cost
@@ -99,8 +119,8 @@ class MH5RobotEnv(MujocoEnv):
         reward_info = {
             "reward_healthy": np.array(healthy_reward),
             "reward_forward": np.array(forward_reward),
-            "reward_ctrl": np.array(control_cost),
-            "reward_contact": np.array(contact_cost),
+            "cost_ctrl": np.array(control_cost),
+            "cost_contact": np.array(contact_cost),
         }
 
         return reward, reward_info
@@ -122,7 +142,8 @@ class MH5RobotEnv(MujocoEnv):
         if np.isnan(np.sum(action)):
             logging.getLogger("mh5_env").error(f"action contains nan: {action}")
             raise ValueError(f"action contains nan: {action}")
-
+        self.do_simulation(action, self.frame_skip)
+        self._steps_taken += 1
         x_velocity, y_velocity = self.data.qvel[:2]
         observation = self._get_obs()
 
@@ -169,6 +190,7 @@ class MH5RobotEnv(MujocoEnv):
             low=noise_low, high=noise_high, size=self.model.nv
         )
         self.set_state(qpos, qvel)
+        self._steps_taken = 0
         observation = self._get_obs()
         return observation
 
