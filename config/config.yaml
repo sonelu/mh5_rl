@@ -3,11 +3,6 @@ defaults:
   - logger@logger: wandb
 
   - env@environments.training_env: transformed_env
-  - env@environments.training_env.base_env: gym
-  - transform@environments.training_env.transform: compose
-  - env@environments.evaluation_env: transformed_env
-  - env@environments.evaluation_env.base_env: gym
-  - transform@environments.evaluation_env.transform: compose
 
   - transform@transform_step_counter: step_counter
   - transform@transform_double_to_float: double_to_float
@@ -37,6 +32,25 @@ logger:
   offline: false
   project: MH5_RL
 
+mh5_env:
+  _target_: torchrl.envs.GymEnv
+  env_name: MH5Robot-v8
+  k_healthy: ${rewards.weights.k_healthy}
+  k_forward: ${rewards.weights.k_forward}
+  k_control: ${rewards.weights.k_control}
+  k_contact: ${rewards.weights.k_contact}
+
+mh5_visual_env:
+  _target_: torchrl.envs.GymEnv
+  env_name: MH5Robot-v8
+  k_healthy: ${rewards.weights.k_healthy}
+  k_forward: ${rewards.weights.k_forward}
+  k_control: ${rewards.weights.k_control}
+  k_contact: ${rewards.weights.k_contact}
+  from_pixels: true
+  pixels_only: false
+  render_mode: rgb_array
+
 transform_step_counter:
   max_steps: 2000
   step_count_key: "step_count"
@@ -46,28 +60,45 @@ transform_cat_frames:
   dim: -1
   in_keys: ["observation"]
 
+transform_video_recorder:
+  _target_: torchrl.record.VideoRecorder
+  logger: ${logger}
+  tag: video
+  fps: 100
+
 environments:
   training_env:
-    base_env:
-      env_name: MH5Robot-v8
+    # _target_: torchrl.envs.TransformedEnv
+    base_env: ${mh5_env}
     transform:
+      _target_: torchrl.envs.transforms.Compose
       transforms:
         - ${transform_step_counter}
         - ${transform_double_to_float}
         - ${transform_cat_frames}
 
   evaluation_env:
-    base_env:
-      env_name: MH5Robot-v8
-      from_pixels: true
-      pixels_only: false
-      render_mode: rgb_array
+    _target_: torchrl.envs.TransformedEnv
+    base_env: ${mh5_visual_env}
     transform:
+      _target_: torchrl.envs.transforms.Compose
       transforms:
         - ${transform_step_counter}
         - ${transform_double_to_float}
         - ${transform_cat_frames}
-        # VideoRecorder does not have yet Config and will have to be added in the PY code
+        - ${transform_video_recorder}
+
+
+# Detailed reward composition
+rewards:
+  # for extending `info` dictionary
+  log_details: ["reward_healthy", "reward_forward", "cost_ctrl", "cost_contact"]
+  # reward weights - will be passed to the env constructor above
+  weights:
+    k_healthy: 10.0
+    k_forward: 1.25
+    k_control: 0.01
+    k_contact: 5e-5
 
 # Network configurations
 networks:
@@ -103,19 +134,18 @@ loss:
 
 # Optimizer configuration
 optimizer:
-  lr: 0.0001
+  lr: 1e-5
 
 # Collector configuration
 collector:
   create_env_fn: ${environments.training_env}
   policy: ${models.policy_model}
-  # total_frames: 1000000
   frames_per_batch: 2000
 
 # Replay buffer configuration
 replay_buffer:
   storage:
-    max_size: 6000
+    max_size: 2000
     device: cpu
     ndim: 1
   sampler:
