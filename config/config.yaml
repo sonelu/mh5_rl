@@ -25,6 +25,8 @@ defaults:
 
   - trainer@trainer: ppo
 
+  - override hydra/launcher: joblib
+
   - _self_
 
 logger:
@@ -39,6 +41,7 @@ mh5_env:
   k_forward: ${rewards.weights.k_forward}
   k_control: ${rewards.weights.k_control}
   k_contact: ${rewards.weights.k_contact}
+  healthy_reward_constant: ${rewards.weights.healthy_constant}
 
 mh5_visual_env:
   _target_: torchrl.envs.GymEnv
@@ -47,6 +50,7 @@ mh5_visual_env:
   k_forward: ${rewards.weights.k_forward}
   k_control: ${rewards.weights.k_control}
   k_contact: ${rewards.weights.k_contact}
+  healthy_reward_constant: ${rewards.weights.healthy_constant}
   from_pixels: true
   pixels_only: false
   render_mode: rgb_array
@@ -95,10 +99,12 @@ rewards:
   log_details: ["reward_healthy", "reward_forward", "cost_ctrl", "cost_contact"]
   # reward weights - will be passed to the env constructor above
   weights:
-    k_healthy: 10.0
+    k_healthy: 1.0
     k_forward: 1.25
     k_control: 0.01
     k_contact: 5e-5
+    k_falling: -1000.0
+    healthy_constant: true
 
 # Network configurations
 networks:

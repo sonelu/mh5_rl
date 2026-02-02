@@ -15,6 +15,7 @@ DEFAULT_K_HEALTHY = 5.0
 DEFAULT_K_FORWARD = 1.25
 DEFAULT_K_CONTROL = 0.02
 DEFAULT_K_CONTACT = 5e-5
+DEFAULT_K_FALLING = -1000.0
 
 class MH5RobotEnv(MujocoEnv):
 
@@ -36,6 +37,8 @@ class MH5RobotEnv(MujocoEnv):
             k_forward: float = DEFAULT_K_FORWARD,
             k_control: float = DEFAULT_K_CONTROL,
             k_contact: float = DEFAULT_K_CONTACT,
+            k_falling: float = DEFAULT_K_FALLING,
+            healthy_reward_constant: bool = False,
             terminate_when_unhealthy: bool = True,
             healthy_z_range = (0.15, 0.25),
             contact_cost_range = (-np.inf, 10.0),
@@ -49,6 +52,8 @@ class MH5RobotEnv(MujocoEnv):
         self._k_forward = k_forward
         self._k_control = k_control
         self._k_contact = k_contact
+        self._k_falling = k_falling
+        self._healthy_reward_constant = healthy_reward_constant
         self._terminate_when_unhealthy = terminate_when_unhealthy
         self._healthy_z_range = healthy_z_range
         self._contact_cost_range = contact_cost_range
@@ -103,10 +108,13 @@ class MH5RobotEnv(MujocoEnv):
         # forward reward only if upright
         if self.z_pos >= self._healthy_z_range[0]:
             forward_reward = self._k_forward * self.data.qvel[0]
-            healthy_reward = self._k_healthy * self._steps_taken / MAX_EPISODE_STEPS
+            if self._healthy_reward_constant:
+                healthy_reward = self._k_healthy
+            else:
+                healthy_reward = self._k_healthy * self._steps_taken / MAX_EPISODE_STEPS
         else:
             forward_reward = 0.0
-            healthy_reward = 0.0
+            healthy_reward = self._k_falling
 
         rewards = forward_reward + healthy_reward
 
